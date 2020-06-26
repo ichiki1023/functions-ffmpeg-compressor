@@ -2,8 +2,8 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 
 import * as fs from "fs-extra";
-import { tmpdir } from "os";
-import { dirname, join } from "path";
+import * as os from "os";
+import * as path from "path";
 
 import * as ffmpeg_static from "ffmpeg-static";
 import * as ffprobe_static from "ffprobe-static";
@@ -23,6 +23,7 @@ const runtimeOpts: functions.RuntimeOptions = {
 };
 
 export const videoCompressor = functions
+  .region("asia-northeast1")
   .runWith(runtimeOpts)
   .storage.object()
   .onFinalize(async (object) => {
@@ -39,24 +40,24 @@ export const videoCompressor = functions
       return;
     }
 
-    const bucketDir = dirname(filePath);
+    const bucketDir = path.dirname(filePath);
 
-    const workingDir = join(tmpdir(), "compressed");
-    const tmpFilePath = join(workingDir, fileName);
+    const workingDir = path.join(os.tmpdir(), "compressed");
+    const tmpFilePath = path.join(workingDir, fileName);
 
     if (!object.contentType) {
       console.error(`fileName not found`);
       return;
     }
 
-    const compressedIdentifier = "compressed@";
+    const compressedIdentifier = "@compressed";
 
     if (
       fileName.includes(compressedIdentifier) ||
       !object.contentType.includes("video")
     ) {
       console.log("exiting function");
-      return false;
+      return;
     }
 
     // 1. Ensure compressed dir exists
@@ -67,15 +68,17 @@ export const videoCompressor = functions
       destination: tmpFilePath,
     });
 
-    const compressedName = `${compressedIdentifier}${fileName}`;
-    const compressedPath = join(workingDir, compressedName);
+    const ext = path.extname(fileName);
+    const basename = path.basename(fileName, ext);
+    const compressedName = `${basename}${compressedIdentifier}.mp4`;
+    const compressedPath = path.join(workingDir, compressedName);
 
     // compress video
     const outputPath = await compress(tmpFilePath, compressedPath);
 
     // uplod to bucket
     bucket.upload(outputPath, {
-      destination: join(bucketDir, compressedName),
+      destination: path.join(bucketDir, compressedName),
     });
 
     return fs.remove(workingDir);
