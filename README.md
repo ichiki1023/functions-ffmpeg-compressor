@@ -14,3 +14,7 @@ $ npm install
 ```bash
 $ npm run deploy
 ```
+
+## License
+
+[MIT licensed](./LICENSE).

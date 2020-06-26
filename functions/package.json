@@ -1,5 +1,7 @@
 {
   "name": "functions-ffmpeg-compressor",
+  "author": "ichiki1023",
+  "license": "MIT",
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "fix": "tslint --fix --project tsconfig.json",
