@@ -17,7 +17,7 @@
   },
   "main": "lib/index.js",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "expo-server-sdk": "^3.4.0",
     "ffmpeg-static": "^4.0.1",
     "ffprobe-static": "^3.0.0",
